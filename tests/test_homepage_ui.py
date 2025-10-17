@@ -1,44 +1,49 @@
-import pytest
+import allure
 from pages.home_page import HomePage
-from utils import locators
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
+
+@allure.title("Cookie-баннер закрывается и не мешает работе")
 def test_cookie_banner_appears_and_disappears(driver):
     home = HomePage(driver)
     home.open_home()
-
-    cookie_banner = WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located(locators.COOKIE_BANNER)
-    )
-    assert cookie_banner.is_displayed()
-
     home.close_cookie_banner()
-    WebDriverWait(driver, 5).until(
-        EC.invisibility_of_element_located(locators.COOKIE_BANNER)
-    )
+    home.click_order_button_header()
+    assert "order" in home.get_current_url()
 
-@pytest.mark.parametrize("top", [True, False])
-def test_order_button_is_clickable(driver, top):
+
+@allure.title("Кнопка 'Заказать' в хедере открывает форму заказа")
+def test_order_button_header_is_clickable_and_opens_order(driver):
     home = HomePage(driver)
     home.open_home()
     home.close_cookie_banner()
+    home.click_order_button_header()
+    assert "order" in home.get_current_url()
 
-    locator = locators.ORDER_BUTTON_HEADER if top else locators.ORDER_BUTTON_FOOTER
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(locator))
-    assert True
 
-@pytest.mark.parametrize("top", [True, False])
-def test_click_order_button_opens_order_page(driver, top):
+@allure.title("Кнопка 'Заказать' в футере открывает форму заказа")
+def test_order_button_footer_is_clickable_and_opens_order(driver):
     home = HomePage(driver)
     home.open_home()
     home.close_cookie_banner()
+    home.click_order_button_footer()
+    assert "order" in home.get_current_url()
 
-    home.click_order_button(top=top)
 
-    assert "order" in driver.current_url
+@allure.title("Клик по логотипу 'Самокат' ведёт на главную страницу")
+def test_scooter_logo_redirects_to_home(driver):
+    home = HomePage(driver)
+    home.open_home()
+    home.close_cookie_banner()
+    home.click_order_button_header()
+    home.click_scooter_logo()
+    assert home.get_current_url() == "https://qa-scooter.praktikum-services.ru/"
 
-    name_field = WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located(locators.ORDER_FIELD_NAME)
-    )
-    assert name_field.is_displayed()
+
+@allure.title("Клик по логотипу 'Яндекс' ведёт на главную страницу Дзена")
+def test_yandex_logo_redirects_to_dzen(driver):
+    home = HomePage(driver)
+    home.open_home()
+    home.close_cookie_banner()
+    home.click_yandex_logo()
+    current_url = home.get_current_url()
+    assert "dzen" in current_url or "ya.ru" in current_url

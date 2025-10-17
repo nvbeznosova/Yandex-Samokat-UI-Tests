@@ -12,6 +12,10 @@
 
 Sprint_6/
 │
+├── locators/ # Локаторы для главной страницы и страниц заказа
+│ ├── home_locators.py
+│ └── order_locators.py
+│
 ├── pages/ # Page Object классы для страниц
 │ ├── base_page.py
 │ ├── home_page.py
@@ -23,7 +27,7 @@ Sprint_6/
 │ └── test_questions.py
 │
 ├── utils/ # Вспомогательные модули
-│ ├── locators.py
+│ ├── config.py
 │ └── test_data.py
 │
 ├── conftest.py # Общие фикстуры для pytest

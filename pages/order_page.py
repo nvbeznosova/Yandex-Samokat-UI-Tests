@@ -1,4 +1,3 @@
-from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
 from locators.order_locators import (
     ORDER_FIELD_NAME,
@@ -11,7 +10,6 @@ from locators.order_locators import (
     RENT_DATE_INPUT,
     RENT_PERIOD_DROPDOWN,
     RENT_PERIOD_OPTION,
-    COLOR_CHECKBOX,
     RENT_COLOR_BLACK,
     RENT_COLOR_GREY,
     RENT_COMMENT,
@@ -28,40 +26,48 @@ class OrderPage(BasePage):
         self.type(ORDER_FIELD_SURNAME, surname)
         self.type(ORDER_FIELD_ADDRESS, address)
 
-        self.click(ORDER_FIELD_METRO)
+        self.type(ORDER_FIELD_METRO, metro)
         self.wait_for_visible(METRO_OPTION(metro))
         try:
             self.click(METRO_OPTION(metro))
         except Exception:
             element = self.find_element(METRO_OPTION(metro))
-            self.driver.execute_script("arguments[0].click();", element)
+            self.js_click(element)
 
         self.type(ORDER_FIELD_PHONE, phone)
-        self.click(ORDER_NEXT_BUTTON)
 
-        self.wait_for_visible(RENT_DATE_INPUT)
+        next_btn = self.find_element(ORDER_NEXT_BUTTON)
+        self.scroll_into_view_element(next_btn)
+        try:
+            self.click(ORDER_NEXT_BUTTON)
+        except Exception:
+            self.js_click(next_btn)
+
+        self.wait_for_visible(RENT_PERIOD_DROPDOWN)
+
+    def fill_rent_form_black(self, date, period, comment):
+        self._fill_common_rent_fields(date, period)
+        self.click(RENT_COLOR_BLACK)
+        self.type(RENT_COMMENT, comment)
+
+    def fill_rent_form_grey(self, date, period, comment):
+        self._fill_common_rent_fields(date, period)
+        self.click(RENT_COLOR_GREY)
+        self.type(RENT_COMMENT, comment)
+
+    def fill_rent_form_custom(self, date, period, color_locator, comment):
+        self._fill_common_rent_fields(date, period)
+        self.click(color_locator)
+        self.type(RENT_COMMENT, comment)
+
+    def _fill_common_rent_fields(self, date, period):
         date_input = self.find_element(RENT_DATE_INPUT)
         self.scroll_into_view_element(date_input)
-
-    def fill_rent_form(self, date, period, color, comment):
-        self.wait_for_visible(RENT_DATE_INPUT)
-        date_input = self.find_element(RENT_DATE_INPUT)
-        self.scroll_into_view_element(date_input)
-
         date_input.clear()
         date_input.send_keys(date)
 
         self.click(RENT_PERIOD_DROPDOWN)
         self.click(RENT_PERIOD_OPTION(period))
-
-        if color in ["black", "черный жемчуг"]:
-            self.click(RENT_COLOR_BLACK)
-        elif color in ["grey", "серая безысходность"]:
-            self.click(RENT_COLOR_GREY)
-        else:
-            self.click(COLOR_CHECKBOX(color))
-
-        self.type(RENT_COMMENT, comment)
 
     def submit_order(self):
         self.click(ORDER_SUBMIT_BUTTON)

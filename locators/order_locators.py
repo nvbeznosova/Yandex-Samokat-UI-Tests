@@ -7,16 +7,16 @@ ORDER_FIELD_METRO = (By.XPATH, "//input[@placeholder='* Станция метр�
 ORDER_FIELD_PHONE = (By.XPATH, "//input[@placeholder='* Телефон: на него позвонит курьер']")
 
 def METRO_OPTION(name):
-    return (By.XPATH, f"//*[contains(@class,'select-search__option') and contains(normalize-space(.), '{name}')]")
+    return (By.XPATH, f"//div[contains(@class,'select-search__option') and contains(text(),'{name}')]")
 
 ORDER_NEXT_BUTTON = (By.XPATH, "//button[text()='Далее']")
 
-RENT_DATE_INPUT = (By.XPATH, "//input[@placeholder='* Когда привезти самокат']")
+RENT_DATE_INPUT = (By.XPATH, "//input[contains(@placeholder,'Когда привезти')]")
 
 RENT_PERIOD_DROPDOWN = (By.CSS_SELECTOR, "div.Dropdown-control")
-RENT_PERIOD_OPTION = lambda text: (By.XPATH, f"//div[@class='Dropdown-option' and text()='{text}']") 
+def RENT_PERIOD_OPTION(text):
+    return (By.XPATH, f"//div[@class='Dropdown-option' and text()='{text}']")
 
-COLOR_CHECKBOX = lambda color: (By.XPATH, f"//label[text()='{color}']/input") 
 RENT_COLOR_BLACK = (By.ID, "black")
 RENT_COLOR_GREY = (By.ID, "grey")
 

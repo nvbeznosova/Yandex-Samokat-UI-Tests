@@ -1,20 +1,23 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
 from locators.order_locators import (
     ORDER_FIELD_NAME,
     ORDER_FIELD_SURNAME,
     ORDER_FIELD_ADDRESS,
     ORDER_FIELD_METRO,
-    METRO_OPTION,
     ORDER_FIELD_PHONE,
     ORDER_NEXT_BUTTON,
     RENT_DATE_INPUT,
     RENT_PERIOD_DROPDOWN,
-    RENT_PERIOD_OPTION,
     RENT_COLOR_BLACK,
     RENT_COLOR_GREY,
     RENT_COMMENT,
     ORDER_SUBMIT_BUTTON,
     ORDER_CONFIRM_BUTTON,
+    ORDER_MODAL,
     ORDER_MODAL_TITLE,
 )
 
@@ -26,13 +29,31 @@ class OrderPage(BasePage):
         self.type(ORDER_FIELD_SURNAME, surname)
         self.type(ORDER_FIELD_ADDRESS, address)
 
-        self.type(ORDER_FIELD_METRO, metro)
-        self.wait_for_visible(METRO_OPTION(metro))
-        try:
-            self.click(METRO_OPTION(metro))
-        except Exception:
-            element = self.find_element(METRO_OPTION(metro))
-            self.js_click(element)
+        metro_input = self.find_element(ORDER_FIELD_METRO)
+        metro_input.clear()
+        prefix = metro[:3]
+        metro_input.send_keys(prefix)
+
+        WebDriverWait(self.driver, self.timeout).until(
+            lambda d: (d.find_element(*ORDER_FIELD_METRO).get_attribute("value") or "").startswith(prefix)
+        )
+
+        selected = False
+        for _ in range(10):
+            metro_input = self.find_element(ORDER_FIELD_METRO)
+            metro_input.send_keys(Keys.ARROW_DOWN)
+            current = metro_input.get_attribute("value") or ""
+            if current.strip().lower() == metro.strip().lower():
+                metro_input.send_keys(Keys.ENTER)
+                selected = True
+                break
+
+        if not selected:
+            metro_input = self.find_element(ORDER_FIELD_METRO)
+            metro_input.send_keys(Keys.ENTER)
+            WebDriverWait(self.driver, self.timeout).until(
+                lambda d: (d.find_element(*ORDER_FIELD_METRO).get_attribute("value") or "").strip().lower() == metro.strip().lower()
+            )
 
         self.type(ORDER_FIELD_PHONE, phone)
 
@@ -65,13 +86,51 @@ class OrderPage(BasePage):
         self.scroll_into_view_element(date_input)
         date_input.clear()
         date_input.send_keys(date)
+        date_input.send_keys(Keys.ENTER)
 
-        self.click(RENT_PERIOD_DROPDOWN)
-        self.click(RENT_PERIOD_OPTION(period))
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.invisibility_of_element_located((By.CLASS_NAME, "react-datepicker"))
+        )
+
+        dropdown = WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable(RENT_PERIOD_DROPDOWN)
+        )
+        self.scroll_into_view_element(dropdown)
+        try:
+            dropdown.click()
+        except:
+            self.driver.execute_script("arguments[0].click();", dropdown)
+
+        menu = WebDriverWait(self.driver, self.timeout).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.Dropdown-menu[aria-expanded='true']"))
+        )
+
+        options = menu.find_elements(By.CSS_SELECTOR, "div.Dropdown-option")
+        print("Опции в выпадашке:", [opt.text for opt in options])
+
+        for opt in options:
+            if opt.text.strip().lower() == period.strip().lower():
+                self.scroll_into_view_element(opt)
+                opt.click()
+                break
+        else:
+            raise Exception(f"Не найдена опция срока аренды: {period}")
 
     def submit_order(self):
         self.click(ORDER_SUBMIT_BUTTON)
-        self.click(ORDER_CONFIRM_BUTTON)
+
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.visibility_of_element_located(ORDER_MODAL)
+        )
+
+        confirm_btn = WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable(ORDER_CONFIRM_BUTTON)
+        )
+        self.scroll_into_view_element(confirm_btn)
+        try:
+            confirm_btn.click()
+        except:
+            self.driver.execute_script("arguments[0].click();", confirm_btn)
 
     def is_order_confirmed(self):
         self.wait_for_visible(ORDER_MODAL_TITLE)

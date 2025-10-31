@@ -7,8 +7,8 @@ def driver():
     options = Options()
     options.add_argument("--width=1920")
     options.add_argument("--height=1080")
-    options.add_argument("--headless")
 
     driver = webdriver.Firefox(options=options)
+    driver.maximize_window()
     yield driver
     driver.quit()

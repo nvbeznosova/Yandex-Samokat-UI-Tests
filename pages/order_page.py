@@ -17,7 +17,6 @@ from locators.order_locators import (
     RENT_COMMENT,
     ORDER_SUBMIT_BUTTON,
     ORDER_CONFIRM_BUTTON,
-    ORDER_MODAL,
     ORDER_MODAL_TITLE,
 )
 
@@ -117,11 +116,14 @@ class OrderPage(BasePage):
             raise Exception(f"Не найдена опция срока аренды: {period}")
 
     def submit_order(self):
-        self.click(ORDER_SUBMIT_BUTTON)
-
-        WebDriverWait(self.driver, self.timeout).until(
-            EC.visibility_of_element_located(ORDER_MODAL)
+        order_btn = WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable(ORDER_SUBMIT_BUTTON)
         )
+        self.scroll_into_view_element(order_btn)
+        try:
+            order_btn.click()
+        except Exception:
+            self.driver.execute_script("arguments[0].click();", order_btn)
 
         confirm_btn = WebDriverWait(self.driver, self.timeout).until(
             EC.element_to_be_clickable(ORDER_CONFIRM_BUTTON)
@@ -129,7 +131,7 @@ class OrderPage(BasePage):
         self.scroll_into_view_element(confirm_btn)
         try:
             confirm_btn.click()
-        except:
+        except Exception:
             self.driver.execute_script("arguments[0].click();", confirm_btn)
 
     def is_order_confirmed(self):

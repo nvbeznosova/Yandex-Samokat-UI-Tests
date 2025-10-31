@@ -17,9 +17,8 @@ RENT_COLOR_GREY = (By.ID, "grey")
 
 RENT_COMMENT = (By.XPATH, "//input[@placeholder='Комментарий для курьера']")
 
-ORDER_SUBMIT_BUTTON = (By.XPATH, "//button[text()='Заказать']")
-ORDER_CONFIRM_BUTTON = (By.XPATH, "//button[normalize-space(text())='Да']")
-
-ORDER_MODAL = (By.CLASS_NAME, "Order_Modal__YZ-d3")
+ORDER_SUBMIT_BUTTON = (By.XPATH, "//div[contains(@class,'Order_Buttons__1xGrp')]//button[text()='Заказать']")
+ORDER_CONFIRM_BUTTON = (By.XPATH, "//div[contains(@class,'Order_Modal__YZ-d3')]//button[text()='Да']")
+ORDER_MODAL = (By.XPATH, "//div[contains(@class,'Order_Modal__YZ-d3')]")
 
 ORDER_MODAL_TITLE = (By.XPATH, "//*[contains(text(),'Заказ оформлен')]")

@@ -97,19 +97,20 @@ text
 ### Running tests
 
 1. **Run all tests (default browser = Chrome)**
-    ```bash
+
+```bash
   pytest tests/
   ```
 
 2. **Run a specific test file**
 
-   ```bash
-   pytest tests/test_order_form.py
+```bash
+   pytest tests/test_order_form.py 
    ```
 
 3. **Run tests with a specific browser** (Chrome or Firefox)
 
-   ```bash
+```bash
    pytest --browser=firefox tests/
    ```
 
